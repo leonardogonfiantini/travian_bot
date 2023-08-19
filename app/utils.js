@@ -1,7 +1,6 @@
-import { humanType, humanClick, humanRandomMouseMove, randomDelay } from './human.js';
+import { humanRandomMouseMove, randomDelay } from './human.js';
 
 export async function getVillageResourcesInfo(page, village_url) {
-
     const info = [];
 
     // Go to resources page
@@ -9,22 +8,22 @@ export async function getVillageResourcesInfo(page, village_url) {
     await humanRandomMouseMove(page);
 
     // Resource fields
-    const resourceContainer = await page.waitForSelector('div#resourceFieldContainer'); // Wait for the container to load
-    const resources = await resourceContainer.$$('a'); // Locate the <a> elements
+    const resourceContainer = await page.waitForSelector('div#resourceFieldContainer');
+    const resources = await resourceContainer.$$('a');
 
     for (const resource of resources) {
-        const resourceClass = await resource.getAttribute('class');
+        const resourceClass = await resource.evaluate(el => el.getAttribute('class'));
         if (resourceClass.includes('villageCenter')) continue;
 
         const resourceLevel = resourceClass.match(/level(\d+)/)[1];
         const resourceType = resourceClass.match(/gid(\d+)/)[1];
         const resourceSlot = resourceClass.match(/buildingSlot(\d+)/)[1];
-        const resourceHref = await resource.getAttribute('href');
+        const resourceHref = await resource.evaluate(el=> el.getAttribute('href'));
 
         info.push({
             level: resourceLevel,
             type: resourceType === '1' ? 'wood' : resourceType === '2' ? 'clay' : resourceType === '3' ? 'iron' : 'crop',
-            status: resourceClass.includes('underConstruction') ? 'under construcion' : 'normal',
+            status: resourceClass.includes('underConstruction') ? 'under construction' : 'normal',
             href: resourceHref,
             slot: resourceSlot,
         });
@@ -34,11 +33,9 @@ export async function getVillageResourcesInfo(page, village_url) {
     await randomDelay(page);
 
     return info;
-
 }
 
 export async function getVillageBuildingsInfo(page, village_url) {
-
     const info = [];
 
     // Go to buildings page
@@ -46,43 +43,39 @@ export async function getVillageBuildingsInfo(page, village_url) {
     await humanRandomMouseMove(page);
 
     // Building fields
-    const buildingContainer = await page.waitForSelector('div#villageContent'); 
+    const buildingContainer = await page.waitForSelector('div#villageContent');
     const buildings = await buildingContainer.$$('div.buildingSlot');
 
     for (const building of buildings) {
-        
-        const buildingName = await building.getAttribute('data-name');
-        const buildingId = await building.getAttribute('data-building-id');
-        
+        const buildingName = await building.evaluate(el => el.getAttribute('data-name'));
+        const buildingId = await building.evaluate(el => el.getAttribute('data-building-id'));
+
         const buildingTag = await building.$('a');
-        const buildingClass = await buildingTag.getAttribute('class');
-        const buildingLevel = await buildingTag.getAttribute('data-level');
-        const buildinghref = await buildingTag.getAttribute('href');
-        const buildingSlot = await building.getAttribute('data-aid')
+        const buildingClass = await buildingTag.evaluate(el => el.getAttribute('class'));
+        const buildingLevel = await buildingTag.evaluate(el => el.getAttribute('data-level'));
+        const buildingHref = await buildingTag.evaluate(el => el.getAttribute('href'));
+        const buildingSlot = await building.evaluate(el => el.getAttribute('data-aid'));
 
         info.push({
             id: buildingId,
             name: buildingName,
             level: buildingLevel,
-            status: buildingClass.includes('underConstruction') ? 'under construcion' : 'normal',
-            href: buildinghref,
+            status: buildingClass.includes('underConstruction') ? 'under construction' : 'normal',
+            href: buildingHref,
             slot: buildingSlot,
-        })
-        
+        });
     }
 
     await humanRandomMouseMove(page);
     await randomDelay(page);
 
     return info;
-
 }
 
 export async function getVillagesList(page) {
-
     const villages = [];
 
-    //Go to the villages page
+    // Go to the villages page
     await page.goto('https://ts4.x1.europe.travian.com/dorf1.php');
     await humanRandomMouseMove(page);
 
@@ -91,16 +84,15 @@ export async function getVillagesList(page) {
     const villageList = await villageContainer.$$('div.listEntry');
 
     for (const village of villageList) {
-        
         const villageTagA = await village.$('a');
-        const villageHref = await villageTagA.getAttribute('href');
+        const villageHref = await page.evaluate(el => el.getAttribute('href'), villageTagA);
 
         const villageTagSpan = await village.$('span.coordinatesGrid');
-        const villageName = await villageTagSpan.getAttribute('data-villagename');
-        const villageCoordX = await villageTagSpan.getAttribute('data-x');
-        const villageCoordY = await villageTagSpan.getAttribute('data-y');
-        const villageId = await villageTagSpan.getAttribute('data-did');
-        
+        const villageName = await page.evaluate(el => el.getAttribute('data-villagename'), villageTagSpan);
+        const villageCoordX = await page.evaluate(el => el.getAttribute('data-x'), villageTagSpan);
+        const villageCoordY = await page.evaluate(el => el.getAttribute('data-y'), villageTagSpan);
+        const villageId = await page.evaluate(el => el.getAttribute('data-did'), villageTagSpan);
+
         villages.push({
             name: villageName,
             href: villageHref,
@@ -114,5 +106,4 @@ export async function getVillagesList(page) {
     await randomDelay(page);
 
     return villages;
-
 }
