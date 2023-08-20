@@ -107,3 +107,29 @@ export async function getVillagesList(page) {
 
     return villages;
 }
+
+export async function checkVillageBuildingList(page) {
+
+    await page.goto('https://ts4.x1.europe.travian.com/dorf1.php');
+    await humanRandomMouseMove(page);
+    
+    try {
+        const buildingContainer = await page.waitForSelector('div.buildingList');
+        const buildings = await buildingContainer.$$('div.name');
+
+
+        if (buildings.length >= 2) {
+            await humanRandomMouseMove(page);
+            return false;
+        }
+
+        await humanRandomMouseMove(page);
+        return true;
+
+    } catch(e) {
+        await humanRandomMouseMove(page);
+        return true;
+    }
+
+
+}
