@@ -10,6 +10,7 @@ export async function humanType(element, text, page) {
 export async function humanClick(element, page) {
     await randomDelay(page);
     await element.click();
+    await randomDelay(page)
 }
 
 export async function humanRandomMouseMove(page) {
