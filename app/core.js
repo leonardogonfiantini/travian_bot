@@ -74,3 +74,17 @@ export async function upgradeSlot(page, slot_url) {
     return true;
 
 }
+
+export async function launchRaidFromGoldList(page) {
+
+    await page.goto('https://ts4.x1.europe.travian.com/build.php?id=39&gid=16&tt=99');
+    await humanRandomMouseMove(page);
+    await randomDelay(page);
+
+    const buttonRaid = await page.waitForSelector('button[value="Avvia"]');
+
+    await humanRandomMouseMove(page);
+    await humanClick(buttonRaid, page);
+    await randomDelay(page);
+
+}
