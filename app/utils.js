@@ -1,11 +1,11 @@
-import { humanRandomMouseMove, randomDelay } from './human.js';
+import * as human from './human.js';
 
-export async function getVillageResourcesInfo(page, village_url) {
+export async function get_village_resource(page, village_url) {
     const info = [];
 
     // Go to resources page
     await page.goto(`https://ts4.x1.europe.travian.com/dorf1.php${village_url}`);
-    await humanRandomMouseMove(page);
+    await human.mmouse(page);
 
     // Resource fields
     const resourceContainer = await page.waitForSelector('div#resourceFieldContainer');
@@ -29,18 +29,18 @@ export async function getVillageResourcesInfo(page, village_url) {
         });
     }
 
-    await humanRandomMouseMove(page);
-    await randomDelay(page);
+    await human.mmouse(page);
+    await human.delay(page);
 
     return info;
 }
 
-export async function getVillageBuildingsInfo(page, village_url) {
+export async function get_village_buildings(page, village_url) {
     const info = [];
 
     // Go to buildings page
     await page.goto(`https://ts4.x1.europe.travian.com/dorf2.php${village_url}`);
-    await humanRandomMouseMove(page);
+    await human.mmouse(page);
 
     // Building fields
     const buildingContainer = await page.waitForSelector('div#villageContent');
@@ -66,18 +66,18 @@ export async function getVillageBuildingsInfo(page, village_url) {
         });
     }
 
-    await humanRandomMouseMove(page);
-    await randomDelay(page);
+    await human.mmouse(page);
+    await human.delay(page);
 
     return info;
 }
 
-export async function getVillagesList(page) {
+export async function get_villages(page) {
     const villages = [];
 
     // Go to the villages page
     await page.goto('https://ts4.x1.europe.travian.com/dorf1.php');
-    await humanRandomMouseMove(page);
+    await human.mmouse(page);
 
     // Get the villages
     const villageContainer = await page.waitForSelector('div.villageList');
@@ -102,16 +102,16 @@ export async function getVillagesList(page) {
         });
     }
 
-    await humanRandomMouseMove(page);
-    await randomDelay(page);
+    await human.mmouse(page);
+    await human.delay(page);
 
     return villages;
 }
 
-export async function checkVillageBuildingList(page) {
+export async function check_village_building_queue(page) {
 
     await page.goto('https://ts4.x1.europe.travian.com/dorf1.php');
-    await humanRandomMouseMove(page);
+    await human.mmouse(page);
     
     try {
         const buildingContainer = await page.waitForSelector('div.buildingList');
@@ -119,15 +119,15 @@ export async function checkVillageBuildingList(page) {
 
 
         if (buildings.length >= 2) {
-            await humanRandomMouseMove(page);
+            await human.mmouse(page);
             return false;
         }
 
-        await humanRandomMouseMove(page);
+        await human.mmouse(page);
         return true;
 
     } catch(e) {
-        await humanRandomMouseMove(page);
+        await human.mmouse(page);
         return true;
     }
 

@@ -1,56 +1,63 @@
-import puppeteer from 'puppeteer-extra';
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-import dotenv from 'dotenv';
+import * as bot from './core.js'
 
-import { login, getVillagesInfo, testFunction, upgradeSlot, launchRaidFromGoldList } from './core.js'
 
-// Register the Stealth plugin
-puppeteer.use(StealthPlugin());
 
 (async () => {
-    const browser = await puppeteer.launch({
-        headless: false,
-    });
 
-    const page = await browser.newPage();
+    const bot_info = await bot.init_bot();
 
+    const page = bot_info.page;
+    const browser = bot_info.browser;
+    const username = bot_info.username;
+    const password = bot_info.password;
 
-    dotenv.config();
-    const username = process.env.TRAVIAN_USERNAME;
-    const password = process.env.TRAVIAN_PASSWORD;
 
     await new Promise(resolve => setTimeout(resolve, 2000))
-
-    await login(page, username, password);
+    await bot.login(page, username, password);
 
 
     while(true) {
 
-        await launchRaidFromGoldList(page);
+        try {
+            
+            //upgrade all the village resources level by level
+            const villagesInfo = await bot.get_villages_info(page);
 
-        //upgrade all the village resources level by level
-        const villagesInfo = await getVillagesInfo(page);
+            let min_level = 16; 
 
-        let min_level = 16; 
-
-        for (const villageInfo of villagesInfo) {  
-            for (const resource of villageInfo.resources) {
-                if (resource.level < min_level && resource.type != 'crop') {
-                    min_level = resource.level;
+            for (const villageInfo of villagesInfo) {
+                if (villageInfo.village.name == '02') {
+                    for (const resource of villageInfo.resources) {
+                        if (resource.level < min_level) {
+                            min_level = resource.level;
+                        }
+                    }
                 }
             }
-        }
 
-        for (const villageInfo of villagesInfo) {
-            for (const resource of villageInfo.resources) {
-                if (resource.level == min_level && resource.status == 'normal' && resource.type != 'crop') {
-                    const status = await upgradeSlot(page, resource.href);
-                    if (status) break;
+            await bot.launch_raid_from_farm_list(page);
+
+
+            for (const villageInfo of villagesInfo) {
+                if (villageInfo.village.name == '02') {
+                    for (const resource of villageInfo.resources) {
+                        if (resource.level == min_level && resource.status == 'normal') {
+                            const status = await bot.upgrade_slot(page, resource.href);
+                            if (status) break;
+                        }
+                    }
                 }
             }
-        }
 
-        await new Promise(resolve => setTimeout(resolve, 1000 * 60 * 2));
+            await bot.launch_raid_from_farm_list(page);
+
+
+        } catch(e) {
+
+            await new Promise(resolve => setTimeout(resolve, 1000 * 60 * 2));
+            await bot.login(page, username, password);
+
+        }
 
     }
 
@@ -59,39 +66,3 @@ puppeteer.use(StealthPlugin());
 })();
 
 
-
-// while(true) {
-
-//     await getVillagesInfo(page);
-//     await launchRaidFromGoldList(page);
-
-//     await new Promise(resolve => setTimeout(resolve, 1000 * 60 * 5));
-// }
-
-//  while(true) {
-
-//         //upgrade all the village resources level by level
-//         const villagesInfo = await getVillagesInfo(page);
-
-//         let min_level = 16; 
-
-//         for (const villageInfo of villagesInfo) {  
-//             for (const resource of villageInfo.resources) {
-//                 if (resource.level < min_level) {
-//                     min_level = resource.level;
-//                 }
-//             }
-//         }
-
-//         for (const villageInfo of villagesInfo) {
-//             for (const resource of villageInfo.resources) {
-//                 if (resource.level == min_level && resource.status == 'normal') {
-//                     const status = await upgradeSlot(page, resource.href);
-//                     if (status) break;
-//                 }
-//             }
-//         }
-
-//         await new Promise(resolve => setTimeout(resolve, 1000 * 60 * 20));
-
-//     }

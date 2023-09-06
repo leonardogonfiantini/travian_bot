@@ -1,8 +1,45 @@
-import { humanType, humanClick, humanRandomMouseMove, randomDelay } from './human.js';
-import { getVillagesList, getVillageBuildingsInfo, getVillageResourcesInfo, checkVillageBuildingList } from './utils.js';
+import {
+    get_villages,
+    get_village_resource,
+    get_village_buildings,
+    check_village_building_queue,
+} from './utils.js' //utils functions
 
-export async function testFunction(page) {
-    await checkVillageBuildingList(page);
+import * as human from './human.js'; //human behavior
+
+import puppeteer from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+
+import dotenv from 'dotenv'; //env variables
+import winston from 'winston'; //logger
+
+puppeteer.use(StealthPlugin()); //stealth plugin to avoid detection
+
+export async function init_bot() {
+
+    const browser = await puppeteer.launch({
+        headless: false,
+    });
+
+    const page = await browser.newPage();
+
+
+    dotenv.config();
+    const username = process.env.TRAVIAN_USERNAME;
+    const password = process.env.TRAVIAN_PASSWORD;
+
+    const bot = {
+        browser: browser,
+        page: page,
+        username: username,
+        password: password,
+    }
+    
+    return bot;
+}
+
+export async function test_function(page) {
+    await check_village_building_queue(page);
 }
 
 export async function login(page, username, password) {
@@ -13,34 +50,34 @@ export async function login(page, username, password) {
     const passwordInput = await page.locator('input[name="password"]');
     const loginButton = await page.locator('button[type="submit"]');
 
-    await humanType(usernameInput, username, page);
-    await humanType(passwordInput, password, page);
+    await human.type(usernameInput, username, page);
+    await human.type(passwordInput, password, page);
 
-    await humanRandomMouseMove(page);
-    await humanClick(loginButton, page);
-    await humanRandomMouseMove(page);
+    await human.mmouse(page);
+    await human.click(loginButton, page);
+    await human.mmouse(page);
 
 }
 
-export async function getVillagesInfo(page) {
+export async function get_villages_info(page) {
 
-    await humanRandomMouseMove(page);
+    await human.mmouse(page);
 
     const accountInfo = [];
-    const villages = await getVillagesList(page);
+    const villages = await get_villages(page);
 
     for (const village of villages) {
         
         accountInfo.push({
             village: village,
-            resources: await getVillageResourcesInfo(page, village.href),
-            buildings: await getVillageBuildingsInfo(page, village.href),
+            resources: await get_village_resource(page, village.href),
+            buildings: await get_village_buildings(page, village.href),
         });
         
     }
 
-    await humanRandomMouseMove(page);
-    await randomDelay(page);
+    await human.mmouse(page);
+    await human.delay(page);
 
 
 
@@ -48,17 +85,17 @@ export async function getVillagesInfo(page) {
     
 }
 
-export async function upgradeSlot(page, slot_url) {
+export async function upgrade_slot(page, slot_url) {
 
-    const availableSlots = await checkVillageBuildingList(page);
+    const availableSlots = await check_village_building_queue(page);
     if (!availableSlots) {
         console.log('No available slots');
         return false;
     }
 
     await page.goto(`https://ts4.x1.europe.travian.com${slot_url}`);
-    await humanRandomMouseMove(page);
-    await randomDelay(page);
+    await human.mmouse(page);
+    await human.delay(page);
 
     const buttonUpgradeContainer = await page.waitForSelector('div.section1');
     const buttonUpgrade = await buttonUpgradeContainer.$('button');
@@ -68,23 +105,23 @@ export async function upgradeSlot(page, slot_url) {
         return false;
     }
 
-    await humanRandomMouseMove(page);
-    await humanClick(buttonUpgrade, page);
+    await human.mmouse(page);
+    await human.click(buttonUpgrade, page);
 
     return true;
 
 }
 
-export async function launchRaidFromGoldList(page) {
+export async function launch_raid_from_farm_list(page) {
 
     await page.goto('https://ts4.x1.europe.travian.com/build.php?id=39&gid=16&tt=99');
-    await humanRandomMouseMove(page);
-    await randomDelay(page);
+    await human.mmouse(page);
+    await human.delay(page);
 
     const buttonRaid = await page.waitForSelector('button[value="Avvia"]');
 
-    await humanRandomMouseMove(page);
-    await humanClick(buttonRaid, page);
-    await randomDelay(page);
+    await human.mmouse(page);
+    await human.click(buttonRaid, page);
+    await human.delay(page);
 
 }

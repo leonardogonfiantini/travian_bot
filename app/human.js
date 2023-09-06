@@ -1,4 +1,4 @@
-export async function humanType(element, text, page) {
+export async function type(element, text, page) {
 
     await element.click();
 
@@ -7,19 +7,19 @@ export async function humanType(element, text, page) {
     }
 }
 
-export async function humanClick(element, page) {
-    await randomDelay(page);
+export async function click(element, page) {
+    await delay(page);
     await element.click();
-    await randomDelay(page)
+    await delay(page)
 }
 
-export async function humanRandomMouseMove(page) {
+export async function mmouse(page) {
     for (let i = 0; i < Math.floor(Math.random() * 10 + 1); i++) {
         await page.mouse.move(Math.floor(Math.random() * 1000), Math.floor(Math.random() * 1000), { steps: 40, delay: 500 });
     }
 }
 
-export async function randomDelay(page) {
+export async function delay(page) {
     const min = 2000;
     const max = 5000;
     const delay = Math.floor(Math.random() * (max - min)) + min;
