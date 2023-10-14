@@ -1,15 +1,16 @@
-import * as bot from './core.js'
+import * as bot from './core'
 
+import {Page, Browser} from 'puppeteer';
 
 
 (async () => {
 
     const bot_info = await bot.init_bot();
 
-    const page = bot_info.page;
-    const browser = bot_info.browser;
-    const username = bot_info.username;
-    const password = bot_info.password;
+    const page : Page = bot_info.page;
+    const browser : Browser = bot_info.browser;
+    const username : string = bot_info.username || "";
+    const password : string = bot_info.password || "";
 
 
     await new Promise(resolve => setTimeout(resolve, 2000))
